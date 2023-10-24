@@ -7,6 +7,8 @@ try {
 }
 
 const ExerciseSchema = mongoose.Schema({
+  userId: String,
+  username: String,
   description: {
     type: String,
     required: true,
@@ -16,11 +18,10 @@ const ExerciseSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-  date: {
-    type: Date,
-    default: Date.now(),
-  },
+  date: String,
 });
+
+ExerciseSchema.set("versionKey", false);
 
 const ExerciseModel = mongoose.model("exercise_model", ExerciseSchema);
 
