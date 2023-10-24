@@ -21,7 +21,6 @@ appRouter.get("/users", async (req, res) => {
 });
 
 appRouter.post("/users", async (req, res) => {
-  console.log(req.body);
   const username = req.body?.username;
   try {
     const user = await UserModel.create({ username });
