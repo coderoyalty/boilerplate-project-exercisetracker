@@ -70,4 +70,41 @@ appRouter.post("/users/:_id/exercises", async (req, res) => {
   }
 });
 
+appRouter.get("/users/:_id/logs", async (req, res) => {
+  const id = req.params._id;
+  const limit = Number(req.query.limit) || 0;
+  // use 1970-01-01 if "from" is not given
+  const from = req.query.from || "1970-01-01";
+  // use current date if "to" is not given
+  const to = req.query.to || new Date().toISOString().slice(0, 10);
+
+  try {
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.sendStatus(404);
+    }
+    const exercises = await ExerciseModel.find({
+      userId: user._id,
+      date: { $gte: from, $lte: to },
+    })
+      .limit(limit)
+      .exec();
+
+    return res.status(200).json({
+      username: user.username,
+      _id: id,
+      log: exercises.map((exercise) => {
+        return {
+          description: exercise.description,
+          duration: exercise.duration,
+          date: new Date(exercise.date).toDateString(),
+        };
+      }),
+      count: exercises.length,
+    });
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+});
+
 module.exports = appRouter;
