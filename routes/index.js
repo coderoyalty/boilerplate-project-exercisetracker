@@ -40,7 +40,6 @@ appRouter.post("/users/:_id/exercises", async (req, res) => {
   let date = req.body?.date || new Date().toISOString().substring(0, 10);
   try {
     const user = await UserModel.findById(req.params._id);
-    console.log(user);
     if (isNaN(pDuration)) {
       return res.status(400).send({
         error: "invalid duration",
@@ -52,7 +51,6 @@ appRouter.post("/users/:_id/exercises", async (req, res) => {
       });
     }
 
-    console.log(date);
     const exercise = await ExerciseModel.create({
       userId: req.params._id,
       username: user.username,
@@ -60,7 +58,13 @@ appRouter.post("/users/:_id/exercises", async (req, res) => {
       date,
       duration: pDuration,
     });
-    return res.status(201).json(exercise);
+    return res.status(201).json({
+      username: user.username,
+      _id: user._id,
+      description: exercise.description,
+      date: new Date(exercise.date).toDateString(),
+      duration: exercise.duration,
+    });
   } catch (err) {
     return res.status(500).send(err);
   }
