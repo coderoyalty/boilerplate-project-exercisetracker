@@ -21,15 +21,48 @@ appRouter.get("/users", async (req, res) => {
 });
 
 appRouter.post("/users", async (req, res) => {
-  const username = req.body?.username;
+  const { username } = req.body;
+  if (!username) {
+    return res.sendStatus(400);
+  }
   try {
     const user = await UserModel.create({ username });
-    return res.status(201).json({
-      _id: user._id,
-      username: user?.username,
-    });
+    await user.save();
+    return res.status(201).json(user);
   } catch (err) {
-    return res.status(400).send(err);
+    return res.status(500).send(err);
+  }
+});
+
+appRouter.post("/users/:_id/exercises", async (req, res) => {
+  const { description, duration } = req.body;
+  let pDuration = parseInt(duration);
+  let date = req.body?.date || new Date().toISOString().substring(0, 10);
+  try {
+    const user = await UserModel.findById(req.params._id);
+    console.log(user);
+    if (isNaN(pDuration)) {
+      return res.status(400).send({
+        error: "invalid duration",
+      });
+    }
+    if (!user) {
+      return res.status(401).send({
+        error: "invalid id provided",
+      });
+    }
+
+    console.log(date);
+    const exercise = await ExerciseModel.create({
+      userId: req.params._id,
+      username: user.username,
+      description,
+      date,
+      duration: pDuration,
+    });
+    return res.status(201).json(exercise);
+  } catch (err) {
+    return res.status(500).send(err);
   }
 });
 
